@@ -12,8 +12,10 @@ import { FontAwesome } from '@expo/vector-icons';
 import { fetchDeviceData } from './api';
 import { exportToCsv } from './csv';
 
-// --- Hardcoded Master Code ---
-const MASTER_CODE = "SCAN2025";
+// --- Supabase Configuration ---
+// IMPORTANT: Replace these with your actual Supabase URL and Anon Key
+const SUPABASE_URL = 'https://igklbxroasakiknvwlbj.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlna2xieHJvYXNha2lrbnZ3bGJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwNTEwMDMsImV4cCI6MjA2NjYyNzAwM30.Rhrh7dydLCkqfsi6ooae01bGZsRE94Qnb-qilxtLrp8';
 
 // --- Form Field Configuration ---
 const formFields = [
@@ -32,6 +34,7 @@ const formFields = [
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginAttempt, setLoginAttempt] = useState('');
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
 
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
@@ -41,12 +44,45 @@ export default function App() {
   const isProcessingScan = useRef(false);
 
   // --- Login Handler ---
-  const handleLogin = () => {
-    if (loginAttempt === MASTER_CODE) {
-      setIsAuthenticated(true);
-    } else {
-      Alert.alert('Login Failed', 'The code entered is incorrect.');
-      setLoginAttempt('');
+  const handleLogin = async () => {
+    if (!loginAttempt) {
+        Alert.alert('Login Failed', 'Please enter an access code.');
+        return;
+    }
+    if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+        Alert.alert('Configuration Error', 'Please update the Supabase URL and Key in the App.js file.');
+        return;
+    }
+
+    setIsLoginLoading(true);
+    try {
+        // Construct the query URL
+        const query = new URLSearchParams({
+            select: '*', // Select all columns
+            code: `eq.${loginAttempt}` // Where 'code' equals the login attempt
+        }).toString();
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/access_codes?${query}`, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.length > 0) {
+            // Because of our RLS policy, the database will only return a result if the code is valid AND not expired.
+            setIsAuthenticated(true);
+        } else {
+            Alert.alert('Login Failed', 'The access code is invalid or has expired.');
+            setLoginAttempt('');
+        }
+    } catch (error) {
+        console.error("Login error:", error);
+        Alert.alert('Login Error', 'Could not connect to the authentication server. Please check your internet connection.');
+    } finally {
+        setIsLoginLoading(false);
     }
   };
 
@@ -148,10 +184,15 @@ export default function App() {
             value={loginAttempt}
             onChangeText={setLoginAttempt}
             secureTextEntry
+            autoCapitalize="none"
         />
-        <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Unlock</Text>
-        </TouchableOpacity>
+        {isLoginLoading ? (
+            <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 20 }}/>
+        ) : (
+            <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Unlock</Text>
+            </TouchableOpacity>
+        )}
     </View>
   );
 
