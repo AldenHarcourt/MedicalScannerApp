@@ -12,6 +12,9 @@ import { FontAwesome } from '@expo/vector-icons';
 import { fetchDeviceData } from './api';
 import { exportToCsv } from './csv';
 
+// --- Hardcoded Master Code ---
+const MASTER_CODE = "SCAN2025";
+
 // --- Form Field Configuration ---
 const formFields = [
     { label: 'UDI', id: 'udi', fullWidth: true },
@@ -27,12 +30,26 @@ const formFields = [
 ];
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginAttempt, setLoginAttempt] = useState('');
+
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
   const [inventory, setInventory] = useState([]);
   const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const isProcessingScan = useRef(false);
+
+  // --- Login Handler ---
+  const handleLogin = () => {
+    if (loginAttempt === MASTER_CODE) {
+      setIsAuthenticated(true);
+    } else {
+      Alert.alert('Login Failed', 'The code entered is incorrect.');
+      setLoginAttempt('');
+    }
+  };
+
 
   // --- Effects ---
   useEffect(() => {
@@ -117,6 +134,68 @@ export default function App() {
   }
 
   // --- Render Functions ---
+
+  const renderLoginScreen = () => (
+    <View style={styles.loginContainer}>
+        <StatusBar style="light" />
+        <FontAwesome name="shield" size={60} color={colors.primary} />
+        <Text style={styles.loginTitle}>App Locked</Text>
+        <Text style={styles.loginSubtitle}>Please enter your access code.</Text>
+        <TextInput
+            style={styles.loginInput}
+            placeholder="Access Code"
+            placeholderTextColor="#555"
+            value={loginAttempt}
+            onChangeText={setLoginAttempt}
+            secureTextEntry
+        />
+        <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Unlock</Text>
+        </TouchableOpacity>
+    </View>
+  );
+
+  const renderApp = () => (
+    <SafeAreaView style={styles.screen}>
+      <StatusBar style="light" />
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Medical Device Scanner</Text>
+        
+        {/* --- Scanner --- */}
+        <View style={styles.scannerSection}>
+          <Text style={styles.sectionTitle}>1. Scan Barcode</Text>
+          <View style={styles.cameraContainer}>
+            {isScanning ? (
+              <CameraView
+                onBarcodeScanned={isScanning ? handleBarCodeScanned : undefined}
+                barcodeScannerSettings={{
+                  barcodeTypes: ["qr", "code128", "datamatrix", "pdf417", "ean13"],
+                }}
+                style={StyleSheet.absoluteFillObject}
+              />
+            ) : (
+                <View style={styles.cameraPlaceholder}>
+                   <FontAwesome name="barcode" size={80} color="#4a5568" />
+                   <Text style={{marginTop: 10, color: '#4a5568', fontWeight: '600'}}>Press "Start Scanning"</Text>
+                </View>
+            )}
+          </View>
+          <Button 
+            title={isScanning ? "Stop Scanning" : "Start Scanning"}
+            onPress={isScanning ? stopScanning : startScanning}
+            color={isScanning ? "#e53e3e" : "#00aaff"}
+          />
+        </View>
+        
+        {isLoading && <ActivityIndicator size="large" color={colors.primary} style={{marginVertical: 20}}/>}
+        
+        {renderForm()}
+        {renderTable()}
+
+      </ScrollView>
+    </SafeAreaView>
+  );
+
   const renderForm = () => (
     <View style={styles.formContainer}>
       <Text style={styles.sectionTitle}>2. Review & Add Item</Text>
@@ -161,7 +240,7 @@ export default function App() {
             <View key={index} style={[styles.tableRow, styles.dataRow]}>
               {formFields.map(f => <Text key={f.id} style={[styles.tableCell, {width: 120}]}>{item[f.id]}</Text>)}
                <TouchableOpacity onPress={() => removeItem(index)} style={[styles.tableCell, {width: 80, alignItems: 'center'}]}>
-                  <FontAwesome name="trash" size={20} color="#ff4d4d" />
+                  <FontAwesome name="trash" size={20} color={colors.accentRed} />
                </TouchableOpacity>
             </View>
           )) : (
@@ -181,58 +260,19 @@ export default function App() {
   );
 
   if (!permission) {
-    return <View style={styles.screen}><ActivityIndicator color="#00ffff" /></View>;
+    return <View style={styles.screen}><ActivityIndicator color={colors.primary} /></View>;
   }
 
-  if (!permission.granted) {
+  if (!permission.granted && !isAuthenticated) {
     return (
       <View style={[styles.screen, {justifyContent: 'center'}]}>
         <Text style={{ textAlign: 'center', marginBottom: 10, color: '#eee' }}>We need your permission to show the camera</Text>
-        <Button onPress={requestPermission} title="Grant Permission" color="#00ffff"/>
+        <Button onPress={requestPermission} title="Grant Permission" color={colors.primary}/>
       </View>
     );
   }
 
-  return (
-    <SafeAreaView style={styles.screen}>
-      <StatusBar style="light" />
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Medical Device Scanner</Text>
-        
-        {/* --- Scanner --- */}
-        <View style={styles.scannerSection}>
-          <Text style={styles.sectionTitle}>1. Scan Barcode</Text>
-          <View style={styles.cameraContainer}>
-            {isScanning ? (
-              <CameraView
-                onBarcodeScanned={isScanning ? handleBarCodeScanned : undefined}
-                barcodeScannerSettings={{
-                  barcodeTypes: ["qr", "code128", "datamatrix", "pdf417", "ean13"],
-                }}
-                style={StyleSheet.absoluteFillObject}
-              />
-            ) : (
-                <View style={styles.cameraPlaceholder}>
-                   <FontAwesome name="barcode" size={80} color="#4a5568" />
-                   <Text style={{marginTop: 10, color: '#4a5568', fontWeight: '600'}}>Press "Start Scanning"</Text>
-                </View>
-            )}
-          </View>
-          <Button 
-            title={isScanning ? "Stop Scanning" : "Start Scanning"}
-            onPress={isScanning ? stopScanning : startScanning}
-            color={isScanning ? "#e53e3e" : "#00aaff"}
-          />
-        </View>
-        
-        {isLoading && <ActivityIndicator size="large" color="#00ffff" style={{marginVertical: 20}}/>}
-        
-        {renderForm()}
-        {renderTable()}
-
-      </ScrollView>
-    </SafeAreaView>
-  );
+  return isAuthenticated ? renderApp() : renderLoginScreen();
 }
 
 // --- Stylesheet ---
@@ -254,6 +294,13 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: 'bold', marginBottom: 20, color: colors.text, letterSpacing: 1 },
   sectionTitle: { fontSize: 20, fontWeight: '600', color: colors.primary, alignSelf: 'flex-start', marginBottom: 15},
   
+  // Login Screen
+  loginContainer: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', padding: 20 },
+  loginTitle: { fontSize: 24, color: colors.text, fontWeight: 'bold', marginTop: 20, marginBottom: 10 },
+  loginSubtitle: { fontSize: 16, color: colors.textSecondary, marginBottom: 30},
+  loginInput: { width: '80%', borderWidth: 1, borderColor: colors.border, padding: 15, borderRadius: 8, backgroundColor: colors.surface, color: colors.text, fontSize: 18, textAlign: 'center', marginBottom: 20 },
+  loginButton: { backgroundColor: colors.primary, width: '80%', flex: 0 },
+
   // Scanner
   scannerSection: { width: '100%', marginBottom: 20, backgroundColor: colors.surface, padding: 15, borderRadius: 12 },
   cameraContainer: { width: '100%', height: 250, backgroundColor: '#000', borderRadius: 8, overflow: 'hidden', marginBottom: 15, justifyContent: 'center', alignItems: 'center' },
@@ -276,7 +323,7 @@ const styles = StyleSheet.create({
   // Table
   tableContainer: { width: '100%', backgroundColor: colors.surface, borderRadius: 12, padding: 15 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border },
-  dataRow: { backgroundColor: 'transparent' }, // No hover effect on mobile, keep it simple
+  dataRow: { backgroundColor: 'transparent' }, 
   tableHeader: { padding: 12, fontWeight: 'bold', color: colors.primary, textTransform: 'uppercase' },
   tableCell: { padding: 12, color: colors.text, verticalAlign: 'middle' },
   placeholderText: { alignSelf: 'center', marginVertical: 30, color: colors.textSecondary },
