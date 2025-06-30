@@ -10,7 +10,7 @@ export const fetchDeviceData = async (di) => {
   // The API expects the DI to be URL encoded.
   const encodedDi = encodeURIComponent(di);
   // The parameter has been corrected from 'udi' to 'di'.
-  const apiUrl = `https://accessgudid.nlm.nih.gov/api/v3/devices/lookup.json?di=${encodedDi}`;
+  const apiUrl = `https://accessgudid.nlm.nih.gov/api/v3/devices/lookup.json?udi=${encodedDi}`;
 
   // This function will now throw an error if the network request fails,
   // which will be caught by the try...catch block in App.js.
