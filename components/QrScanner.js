@@ -50,7 +50,7 @@ export default function QrScanner({ onResult, isScanning }) {
       <div className="w-full h-full bg-black rounded-lg flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl text-secondary mb-4">📱</div>
-          <p className="text-secondary font-semibold">Press "Start Scanning"</p>
+          <p className="text-secondary font-semibold">Press &quot;Start Scanning&quot;</p>
         </div>
       </div>
     );
