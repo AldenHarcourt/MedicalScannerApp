@@ -10,7 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { FontAwesome } from '@expo/vector-icons';
 import { fetchDeviceData } from './api';
-import { exportToCsv } from './csv';
+import { exportToCsv } from '../csv';
 
 // --- Supabase Configuration ---
 // IMPORTANT: Replace these with your actual Supabase URL and Anon Key
