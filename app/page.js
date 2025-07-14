@@ -24,10 +24,12 @@ export default function Home() {
   const [inventory, setInventory] = useState([]);
   const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [debug, setDebug] = useState(""); // Debug state
   const isProcessingScan = useRef(false);
 
   // Handlers
   const handleBarCodeScanned = async (result) => {
+    setDebug("Scan result: " + JSON.stringify(result));
     if (isProcessingScan.current || !result) {
       return;
     }
@@ -39,7 +41,9 @@ export default function Home() {
     try {
       const apiData = await fetchDeviceData(result?.text || result);
       setFormData(apiData);
+      setDebug("API data: " + JSON.stringify(apiData));
     } catch (error) {
+      setDebug("Error: " + error.message);
       alert(error.message || 'Could not fetch device data.');
       setFormData({
         udi: result?.text || result,
@@ -134,6 +138,9 @@ export default function Home() {
           
           {renderForm()}
           {renderTable()}
+          <div style={{ color: 'red', marginTop: 20, wordBreak: 'break-all' }}>
+            {debug}
+          </div>
         </div>
       </div>
     </main>
