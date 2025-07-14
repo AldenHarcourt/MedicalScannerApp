@@ -9,6 +9,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        <title>Medical Device Scanner</title>
         <link rel="icon" href="/favicon.png" />
       </head>
       <body className="bg-background text-text min-h-screen">

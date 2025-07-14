@@ -98,43 +98,45 @@ export default function Home() {
 
   // Main Render
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-5 py-8">
-        <h1 className="text-3xl font-bold text-text text-center mb-8 tracking-wide">
-          Medical Device Scanner
-        </h1>
-        
-        {/* Scanner Section */}
-        <div className="bg-surface rounded-xl p-6 mb-6">
-          <h2 className="text-xl font-semibold text-primary mb-4">1. Scan Barcode</h2>
-          <div className="w-full h-64 bg-black rounded-lg overflow-hidden mb-4">
-            <QrScanner 
-              onResult={handleBarCodeScanned}
-              isScanning={isScanning}
-            />
+    <main>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-5 py-8">
+          <h1 className="text-3xl font-bold text-text text-center mb-8 tracking-wide">
+            Medical Device Scanner
+          </h1>
+          
+          {/* Scanner Section */}
+          <div className="bg-surface rounded-xl p-6 mb-6">
+            <h2 className="text-xl font-semibold text-primary mb-4">1. Scan Barcode</h2>
+            <div className="w-full h-64 bg-black rounded-lg overflow-hidden mb-4">
+              <QrScanner 
+                onResult={handleBarCodeScanned}
+                isScanning={isScanning}
+              />
+            </div>
+            <button 
+              className={`w-full py-3 px-4 rounded-lg font-bold ${
+                isScanning 
+                  ? 'bg-accentRed text-white hover:opacity-90' 
+                  : 'bg-primary text-background hover:opacity-90'
+              } transition-opacity`}
+              onClick={isScanning ? stopScanning : startScanning}
+            >
+              {isScanning ? "Stop Scanning" : "Start Scanning"}
+            </button>
           </div>
-          <button 
-            className={`w-full py-3 px-4 rounded-lg font-bold ${
-              isScanning 
-                ? 'bg-accentRed text-white hover:opacity-90' 
-                : 'bg-primary text-background hover:opacity-90'
-            } transition-opacity`}
-            onClick={isScanning ? stopScanning : startScanning}
-          >
-            {isScanning ? "Stop Scanning" : "Start Scanning"}
-          </button>
+          
+          {isLoading && (
+            <div className="flex justify-center my-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          )}
+          
+          {renderForm()}
+          {renderTable()}
         </div>
-        
-        {isLoading && (
-          <div className="flex justify-center my-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        )}
-        
-        {renderForm()}
-        {renderTable()}
       </div>
-    </div>
+    </main>
   );
 
   function renderForm() {
