@@ -1,40 +1,55 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { BrowserMultiFormatReader } from '@zxing/browser';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 export default function QrScanner({ onResult, isScanning }) {
-  const videoRef = useRef(null);
-  const codeReaderRef = useRef(null);
-  const stopStreamRef = useRef(null);
+  const html5QrRef = useRef(null);
 
   useEffect(() => {
-    if (isScanning && videoRef.current) {
-      codeReaderRef.current = new BrowserMultiFormatReader();
-      codeReaderRef.current.decodeFromVideoDevice(
-        undefined, // use default camera
-        videoRef.current,
-        (result, err, controls) => {
-          if (result) {
-            if (onResult) onResult({ text: result.getText(), result });
-            // Optionally stop after first scan:
-            // controls.stop();
-          }
+    if (isScanning && !html5QrRef.current) {
+      const config = {
+        fps: 10,
+        aspectRatio: 1.0,
+        rememberLastUsedCamera: true,
+        supportedScanTypes: [Html5Qrcode.SCAN_TYPE_CAMERA],
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.CODE_93,
+          Html5QrcodeSupportedFormats.ITF,
+          Html5QrcodeSupportedFormats.CODABAR,
+          Html5QrcodeSupportedFormats.DATA_MATRIX,
+          Html5QrcodeSupportedFormats.PDF_417
+        ]
+      };
+
+      html5QrRef.current = new Html5Qrcode("qr-reader");
+      Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length) {
+          html5QrRef.current.start(
+            { facingMode: "environment" },
+            config,
+            (decodedText, decodedResult) => {
+              if (onResult) onResult({ text: decodedText, result: decodedResult });
+            }
+          );
         }
-      ).then(controls => {
-        stopStreamRef.current = controls;
       }).catch(err => {
-        console.error('Camera error:', err);
+        console.error("Camera error:", err);
       });
     }
+
     return () => {
-      if (stopStreamRef.current) {
-        stopStreamRef.current.stop();
-        stopStreamRef.current = null;
-      }
-      if (codeReaderRef.current) {
-        codeReaderRef.current.reset();
-        codeReaderRef.current = null;
+      if (html5QrRef.current) {
+        html5QrRef.current.stop().then(() => {
+          html5QrRef.current.clear();
+          html5QrRef.current = null;
+        });
       }
     };
   }, [isScanning, onResult]);
@@ -51,8 +66,8 @@ export default function QrScanner({ onResult, isScanning }) {
   }
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <video ref={videoRef} className="w-full h-full object-contain rounded-lg" autoPlay muted playsInline />
+    <div className="w-full h-full">
+      <div id="qr-reader" className="w-full h-full"></div>
     </div>
   );
 } 
