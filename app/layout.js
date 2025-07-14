@@ -1,4 +1,5 @@
 import './globals.css'
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export const metadata = {
   title: 'Medical Device Scanner',
@@ -13,7 +14,9 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.png" />
       </head>
       <body className="bg-background text-text min-h-screen">
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </body>
     </html>
   )
