@@ -44,7 +44,6 @@ export default function Home() {
     setIsScanning(false);
     setIsLoading(true);
 
-    // setFormData({submit: result?.text || result});
     setUdi(result?.text || result);
   };
 
@@ -155,9 +154,9 @@ export default function Home() {
           {submitForm()}
           {renderForm()}
           {renderTable()}
-          <div style={{ color: 'red', marginTop: 20, wordBreak: 'break-all' }}>
-            {debug}
-          </div>
+          // <div style={{ color: 'red', marginTop: 20, wordBreak: 'break-all' }}>
+          //   {debug}
+          // </div>
         </div>
       </div>
     </main>
