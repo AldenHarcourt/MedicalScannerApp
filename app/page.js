@@ -19,12 +19,18 @@ const formFields = [
     { label: 'Serial # / Item #', id: 'serialNumber', fullWidth: true },
 ];
 
+// UDI Verifier Component
+const submitField = [
+  { label: 'Submit UDI', id: 'submit', fullWidth: true}
+]
+
 export default function Home() {
   const [isScanning, setIsScanning] = useState(false);
   const [inventory, setInventory] = useState([]);
   const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [debug, setDebug] = useState(""); // Debug state
+  const [udi, setUdi] = useState("");
   const isProcessingScan = useRef(false);
 
   // Handlers
@@ -38,26 +44,36 @@ export default function Home() {
     setIsScanning(false);
     setIsLoading(true);
 
+    // setFormData({submit: result?.text || result});
+    setUdi(result?.text || result);
+  };
+
+  const fetchData = async () => {
     try {
-      const apiData = await fetchDeviceData(result?.text || result);
+      const apiData = await fetchDeviceData(udi?.text || udi);
       setFormData(apiData);
       setDebug("API data: " + JSON.stringify(apiData));
     } catch (error) {
       setDebug("Error: " + error.message);
-      alert(error.message || 'Could not fetch device data.');
+      // alert(error.message || 'Could not fetch device data.');
       setFormData({
-        udi: result?.text || result,
+        udi: udi?.text || udi,
         timestamp: new Date().toLocaleString(),
         serialNumber: `ITEM-${Date.now()}`
       });
     } finally {
         setIsLoading(false);
     }
+    clearUdi();
   };
 
   const handleFormChange = (id, value) => {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
+
+  const clearUdi = () => {
+    setUdi("");
+  }
 
   const clearForm = () => {
     setFormData({});
@@ -135,7 +151,8 @@ export default function Home() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           )}
-          
+
+          {submitForm()}
           {renderForm()}
           {renderTable()}
           <div style={{ color: 'red', marginTop: 20, wordBreak: 'break-all' }}>
@@ -146,10 +163,38 @@ export default function Home() {
     </main>
   );
 
+  function submitForm() {
+    return (
+      <div className="bg-surface rounded-xl p-6 mb-6">
+        <h2 className="text-xl font-semibold text-primary mb-4">2. Verify UDI</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {submitField.map(field => (
+            <div key={field.id} className={true ? 'md:col-span-2' : ''}>
+              <label className="block text-textSecondary font-medium mb-2">{'Submit UDI'}</label>
+              <input
+                type={false ? 'text' : 'text'}
+                className={`input-field w-full ${false ? 'input-readonly' : ''}`}
+                value={udi || ''}
+                onChange={(e) => setUdi(e.target.value)}
+                placeholder={'UDI'}
+                readOnly={false}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-4">
+          <button className="btn-primary flex-1" onClick={fetchData}>
+            Submit UDI
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   function renderForm() {
     return (
       <div className="bg-surface rounded-xl p-6 mb-6">
-        <h2 className="text-xl font-semibold text-primary mb-4">2. Review & Add Item</h2>
+        <h2 className="text-xl font-semibold text-primary mb-4">3. Review & Add Item</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {formFields.map(field => (
             <div key={field.id} className={field.fullWidth ? 'md:col-span-2' : ''}>
@@ -182,7 +227,7 @@ export default function Home() {
   function renderTable() {
     return (
       <div className="bg-surface rounded-xl p-6">
-        <h2 className="text-xl font-semibold text-primary mb-4">3. Collected Items</h2>
+        <h2 className="text-xl font-semibold text-primary mb-4">4. Collected Items</h2>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
