@@ -8,7 +8,7 @@ import QrScanner from '../components/QrScanner';
 // Form Field Configuration
 const formFields = [
     { label: 'UDI', id: 'udi', fullWidth: true },
-    { label: 'DI', id: 'deviceId' },
+    { label: 'DI', id: 'di' },
     { label: 'Company', id: 'companyName'},
     { label: 'Exp. Date', id: 'expirationDate' },
     { label: 'Lot #', id: 'lotNumber' },
