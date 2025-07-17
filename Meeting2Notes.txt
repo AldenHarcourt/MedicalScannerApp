@@ -1,0 +1,9 @@
+New fields:
+-di
+-company name
+
+Down the road:
+-Migrate to mobile app
+-Figure out unit count
+-Guardrails around manually typing things like date etc. 
+-Autofill things like parentheses for udi and slashes for dates
