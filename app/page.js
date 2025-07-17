@@ -8,8 +8,8 @@ import QrScanner from '../components/QrScanner';
 // Form Field Configuration
 const formFields = [
     { label: 'UDI', id: 'udi', fullWidth: true },
-    { label: 'DI', id: 'deviceId', fullWidth: true },
-    { label: 'Company', id: 'companyName', fullWidth: true },
+    { label: 'DI', id: 'deviceId' },
+    { label: 'Company', id: 'companyName'},
     { label: 'Exp. Date', id: 'expirationDate' },
     { label: 'Lot #', id: 'lotNumber' },
     { label: 'Brand', id: 'brandName' },
@@ -156,9 +156,9 @@ export default function Home() {
           {submitForm()}
           {renderForm()}
           {renderTable()}
-          // <div style={{ color: 'red', marginTop: 20, wordBreak: 'break-all' }}>
-          //   {debug}
-          // </div>
+          {/* <div style={{ color: 'red', marginTop: 20, wordBreak: 'break-all' }}>
+            {debug}
+          </div> */}
         </div>
       </div>
     </main>
