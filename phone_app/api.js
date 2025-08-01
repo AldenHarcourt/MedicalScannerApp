@@ -45,6 +45,8 @@ export const fetchDeviceData = async (di) => {
   if (device) {
       parsedData = {
           ...parsedData,
+          deviceId: device.identifiers?.identifier?.deviceId || '',
+          companyName: device.companyName || '',
           brandName: device.brandName || '',
           refNumber: device.catalogNumber || '',
           partName: device.deviceDescription || '',

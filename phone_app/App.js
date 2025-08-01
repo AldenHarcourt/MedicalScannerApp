@@ -10,16 +10,13 @@ import { StatusBar } from 'expo-status-bar';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { FontAwesome } from '@expo/vector-icons';
 import { fetchDeviceData } from './api';
-import { exportToCsv } from '../csv';
-
-// --- Supabase Configuration ---
-// IMPORTANT: Replace these with your actual Supabase URL and Anon Key
-const SUPABASE_URL = 'https://igklbxroasakiknvwlbj.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlna2xieHJvYXNha2lrbnZ3bGJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwNTEwMDMsImV4cCI6MjA2NjYyNzAwM30.Rhrh7dydLCkqfsi6ooae01bGZsRE94Qnb-qilxtLrp8';
+import { exportToCsv } from './csv';
 
 // --- Form Field Configuration ---
 const formFields = [
     { label: 'UDI', id: 'udi', fullWidth: true },
+    { label: 'DI', id: 'deviceId' },
+    { label: 'Company', id: 'companyName' },
     { label: 'Exp. Date', id: 'expirationDate' },
     { label: 'Lot #', id: 'lotNumber' },
     { label: 'Brand', id: 'brandName' },
@@ -31,61 +28,18 @@ const formFields = [
     { label: 'Serial # / Item #', id: 'serialNumber', fullWidth: true },
 ];
 
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loginAttempt, setLoginAttempt] = useState('');
-  const [isLoginLoading, setIsLoginLoading] = useState(false);
+// Field configuration for manual UDI submission
+const udiInputField = { label: 'Enter UDI', id: 'manualUdi', fullWidth: true };
 
+export default function App() {
   const [permission, requestPermission] = useCameraPermissions();
+  const [manualUdi, setManualUdi] = useState('');
+  const [debugInfo, setDebugInfo] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [inventory, setInventory] = useState([]);
   const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const isProcessingScan = useRef(false);
-
-  // --- Login Handler ---
-  const handleLogin = async () => {
-    if (!loginAttempt) {
-        Alert.alert('Login Failed', 'Please enter an access code.');
-        return;
-    }
-    if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-        Alert.alert('Configuration Error', 'Please update the Supabase URL and Key in the App.js file.');
-        return;
-    }
-
-    setIsLoginLoading(true);
-    try {
-        // Construct the query URL
-        const query = new URLSearchParams({
-            select: '*', // Select all columns
-            code: `eq.${loginAttempt}` // Where 'code' equals the login attempt
-        }).toString();
-
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/access_codes?${query}`, {
-            headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            }
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.length > 0) {
-            // Because of our RLS policy, the database will only return a result if the code is valid AND not expired.
-            setIsAuthenticated(true);
-        } else {
-            Alert.alert('Login Failed', 'The access code is invalid or has expired.');
-            setLoginAttempt('');
-        }
-    } catch (error) {
-        console.error("Login error:", error);
-        Alert.alert('Login Error', 'Could not connect to the authentication server. Please check your internet connection.');
-    } finally {
-        setIsLoginLoading(false);
-    }
-  };
-
 
   // --- Effects ---
   useEffect(() => {
@@ -95,6 +49,40 @@ export default function App() {
   }, [permission]);
   
   // --- Handlers ---
+  const fetchAndSetDeviceData = async (udi) => {
+    if (!udi) return;
+    
+    setIsLoading(true);
+    setDebugInfo(prev => `Fetching data for UDI: ${udi}\n${prev}`);
+    
+    try {
+      const apiData = await fetchDeviceData(udi);
+      setFormData(apiData);
+      setDebugInfo(prev => `Successfully fetched data for UDI: ${udi}\n${prev}`);
+    } catch (error) {
+      const errorMsg = `Error fetching device data: ${error.message}`;
+      setDebugInfo(prev => `${errorMsg}\n${prev}`);
+      Alert.alert('API Error', error.message || 'Could not fetch device data.');
+      setFormData({
+        udi: udi,
+        timestamp: new Date().toLocaleString(),
+        serialNumber: `ITEM-${Date.now()}`
+      });
+    } finally {
+      setIsLoading(false);
+      isProcessingScan.current = false;
+    }
+  };
+
+  const handleManualUdiSubmit = () => {
+    if (!manualUdi.trim()) {
+      Alert.alert('Error', 'Please enter a valid UDI');
+      return;
+    }
+    fetchAndSetDeviceData(manualUdi.trim());
+    setManualUdi('');
+  };
+
   const handleBarCodeScanned = async ({ data }) => {
     if (isProcessingScan.current) {
       return;
@@ -170,32 +158,6 @@ export default function App() {
   }
 
   // --- Render Functions ---
-
-  const renderLoginScreen = () => (
-    <View style={styles.loginContainer}>
-        <StatusBar style="light" />
-        <FontAwesome name="shield" size={60} color={colors.primary} />
-        <Text style={styles.loginTitle}>App Locked</Text>
-        <Text style={styles.loginSubtitle}>Please enter your access code.</Text>
-        <TextInput
-            style={styles.loginInput}
-            placeholder="Access Code"
-            placeholderTextColor="#555"
-            value={loginAttempt}
-            onChangeText={setLoginAttempt}
-            secureTextEntry
-            autoCapitalize="none"
-        />
-        {isLoginLoading ? (
-            <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 20 }}/>
-        ) : (
-            <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Unlock</Text>
-            </TouchableOpacity>
-        )}
-    </View>
-  );
-
   const renderApp = () => (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="light" />
@@ -230,11 +192,38 @@ export default function App() {
         
         {isLoading && <ActivityIndicator size="large" color={colors.primary} style={{marginVertical: 20}}/>}
         
+        {renderManualUdiInput()}
         {renderForm()}
         {renderTable()}
+        {renderDebugInfo()}
 
       </ScrollView>
     </SafeAreaView>
+  );
+
+  const renderManualUdiInput = () => (
+    <View style={[styles.inputContainer, { width: '100%', marginBottom: 20 }]}>
+      <Text style={styles.sectionTitle}>1. Enter UDI Manually</Text>
+      <View style={{ flexDirection: 'row' }}>
+        <TextInput
+          style={[styles.input, { flex: 1, marginRight: 10 }]}
+          value={manualUdi}
+          onChangeText={setManualUdi}
+          placeholder="Enter UDI"
+          placeholderTextColor="#555"
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="go"
+          onSubmitEditing={handleManualUdiSubmit}
+        />
+        <TouchableOpacity 
+          style={[styles.button, styles.primaryButton, { paddingHorizontal: 15 }]} 
+          onPress={handleManualUdiSubmit}
+        >
+          <Text style={styles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 
   const renderForm = () => (
@@ -265,6 +254,24 @@ export default function App() {
       </View>
     </View>
   );
+
+  const renderDebugInfo = () => {
+    if (!debugInfo) return null;
+    return (
+      <View style={styles.debugContainer}>
+        <Text style={styles.debugTitle}>Debug Information</Text>
+        <ScrollView style={styles.debugScrollView}>
+          <Text style={styles.debugText}>{debugInfo}</Text>
+        </ScrollView>
+        <TouchableOpacity 
+          style={[styles.button, styles.secondaryButton, { marginTop: 10, alignSelf: 'flex-end' }]}
+          onPress={() => setDebugInfo('')}
+        >
+          <Text style={styles.buttonText}>Clear Debug</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   const renderTable = () => (
     <View style={styles.tableContainer}>
@@ -304,7 +311,7 @@ export default function App() {
     return <View style={styles.screen}><ActivityIndicator color={colors.primary} /></View>;
   }
 
-  if (!permission.granted && !isAuthenticated) {
+  if (!permission.granted) {
     return (
       <View style={[styles.screen, {justifyContent: 'center'}]}>
         <Text style={{ textAlign: 'center', marginBottom: 10, color: '#eee' }}>We need your permission to show the camera</Text>
@@ -313,7 +320,7 @@ export default function App() {
     );
   }
 
-  return isAuthenticated ? renderApp() : renderLoginScreen();
+  return renderApp();
 }
 
 // --- Stylesheet ---
@@ -368,4 +375,10 @@ const styles = StyleSheet.create({
   tableHeader: { padding: 12, fontWeight: 'bold', color: colors.primary, textTransform: 'uppercase' },
   tableCell: { padding: 12, color: colors.text, verticalAlign: 'middle' },
   placeholderText: { alignSelf: 'center', marginVertical: 30, color: colors.textSecondary },
+  
+  // Debug
+  debugContainer: { width: '100%', backgroundColor: '#1a1a1a', borderRadius: 8, padding: 15, marginTop: 10 },
+  debugTitle: { color: colors.accentGreen, fontWeight: 'bold', marginBottom: 10 },
+  debugScrollView: { maxHeight: 150, marginBottom: 10 },
+  debugText: { color: '#aaa', fontSize: 12, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
 });

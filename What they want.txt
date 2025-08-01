@@ -1,0 +1,8 @@
+-Date/Time stamp
+-Be able to print out from whole last month or just today
+-If 80% works, hand yping the other 20$ can be typed
+-Hand typing or correcting data
+-Example: I just want one brand of stuff
+-Combinable datatables from each scanning batch
+-Combining same item with different exp. dates
+
