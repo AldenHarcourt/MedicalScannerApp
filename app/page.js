@@ -98,21 +98,21 @@ export default function Home() {
   return (
     <main>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-text text-center mb-4 tracking-wide">
+        <div className="container mx-auto px-4 py-3">
+          <h1 className="text-xl font-bold text-text text-center mb-3 tracking-wide">
             Medical Device Scanner
           </h1>
           
           {isLoading && (
-            <div className="flex justify-center my-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <div className="flex justify-center my-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
             </div>
           )}
 
           {/* Optimized 3-section layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[calc(100vh-8rem)]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[calc(100vh-7rem)]">
             {/* Left column: UDI (top) + Collected Items (bottom) */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               {submitForm()}
               {renderTable()}
             </div>
@@ -132,12 +132,12 @@ export default function Home() {
 
   function submitForm() {
     return (
-      <div className="bg-surface rounded-xl p-4">
-        <h2 className="text-lg font-semibold text-primary mb-3">1. Verify UDI</h2>
-        <div className="mb-4">
+      <div className="bg-surface rounded-lg p-3">
+        <h2 className="text-base font-semibold text-primary mb-2">1. Verify UDI</h2>
+        <div className="mb-3">
           {submitField.map(field => (
             <div key={field.id}>
-              <label className="block text-textSecondary font-medium mb-1">{'Submit UDI'}</label>
+              <label className="block text-textSecondary text-sm font-medium mb-1">{'Submit UDI'}</label>
               <input
                 type={false ? 'text' : 'text'}
                 className={`input-field w-full ${false ? 'input-readonly' : ''}`}
@@ -149,7 +149,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <button className="btn-primary w-full" onClick={fetchData}>
+        <button className="btn-primary w-full py-2" onClick={fetchData}>
           Submit UDI
         </button>
       </div>
@@ -158,12 +158,12 @@ export default function Home() {
 
   function renderForm() {
     return (
-      <div className="bg-surface rounded-xl p-4">
-        <h2 className="text-lg font-semibold text-primary mb-3">2. Review & Add Item</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+      <div className="bg-surface rounded-lg p-3">
+        <h2 className="text-base font-semibold text-primary mb-2">2. Review & Add Item</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
           {formFields.map(field => (
             <div key={field.id} className={field.fullWidth ? 'md:col-span-2' : ''}>
-              <label className="block text-textSecondary font-medium mb-1">{field.label}</label>
+              <label className="block text-textSecondary text-sm font-medium mb-1">{field.label}</label>
               <input
                 type={field.readonly ? 'text' : 'text'}
                 className={`input-field w-full ${field.readonly ? 'input-readonly' : ''}`}
@@ -191,18 +191,18 @@ export default function Home() {
 
   function renderTable() {
     return (
-      <div className="bg-surface rounded-xl p-4 flex-1 flex flex-col">
-        <h2 className="text-lg font-semibold text-primary mb-3">3. Collected Items</h2>
+      <div className="bg-surface rounded-lg p-3 flex-1 flex flex-col">
+        <h2 className="text-base font-semibold text-primary mb-2">3. Collected Items</h2>
         <div className="overflow-x-auto flex-1">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
                 {formFields.map(f => (
-                  <th key={f.id} className="text-left p-3 text-primary font-bold uppercase text-sm">
+                  <th key={f.id} className="text-left p-2 text-primary font-bold uppercase text-xs">
                     {f.label}
                   </th>
                 ))}
-                <th className="text-center p-3 text-primary font-bold uppercase text-sm w-20">
+                <th className="text-center p-2 text-primary font-bold uppercase text-xs w-16">
                   Actions
                 </th>
               </tr>
@@ -211,11 +211,11 @@ export default function Home() {
               {inventory.length > 0 ? inventory.map((item, index) => (
                 <tr key={index} className="border-b border-border">
                   {formFields.map(f => (
-                    <td key={f.id} className="p-3 text-text">
+                    <td key={f.id} className="p-2 text-text text-sm">
                       {item[f.id] || ''}
                     </td>
                   ))}
-                  <td className="p-3 text-center">
+                  <td className="p-2 text-center">
                     <button 
                       onClick={() => removeItem(index)}
                       className="text-accentRed hover:opacity-80 transition-opacity"
@@ -226,7 +226,7 @@ export default function Home() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={formFields.length + 1} className="p-6 text-center text-textSecondary">
+                  <td colSpan={formFields.length + 1} className="p-4 text-center text-textSecondary text-sm">
                     Your scanned items will appear here.
                   </td>
                 </tr>
@@ -235,7 +235,7 @@ export default function Home() {
           </table>
         </div>
         <button 
-          className={`btn-export w-full mt-4 ${inventory.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`btn-export w-full mt-3 py-2 ${inventory.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={handleExport}
           disabled={inventory.length === 0}
         >
