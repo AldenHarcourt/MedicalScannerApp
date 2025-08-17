@@ -13,6 +13,7 @@ const formFields = [
     { label: 'Lot #', id: 'lotNumber' },
     { label: 'Brand', id: 'brandName' },
     { label: 'Ref #', id: 'refNumber' },
+    { label: 'Model #', id: 'modelNumber' },
     { label: 'Part Name', id: 'partName', fullWidth: true },
     { label: 'Unit', id: 'unit' },
     { label: 'Quantity', id: 'quantity' },
