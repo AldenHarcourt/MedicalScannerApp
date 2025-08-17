@@ -177,11 +177,9 @@ export default function Home() {
         </div>
         <div className="flex gap-2">
           <button className="btn-primary flex-1" onClick={addItemToList}>
-            <span>➕</span>
             Add to List
           </button>
           <button className="btn-secondary flex-1" onClick={clearForm}>
-            <span>🧹</span>
             Clear Form
           </button>
         </div>
@@ -220,7 +218,7 @@ export default function Home() {
                       onClick={() => removeItem(index)}
                       className="text-accentRed hover:opacity-80 transition-opacity"
                     >
-                      🗑️
+                      Delete
                     </button>
                   </td>
                 </tr>
@@ -239,7 +237,6 @@ export default function Home() {
           onClick={handleExport}
           disabled={inventory.length === 0}
         >
-          <span>📊</span>
           Export as CSV
         </button>
       </div>
