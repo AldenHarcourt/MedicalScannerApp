@@ -7,3 +7,12 @@ Down the road:
 -Figure out unit count
 -Guardrails around manually typing things like date etc. 
 -Autofill things like parentheses for udi and slashes for dates
+
+Next Meeting
+
+Add Version Number field
+Remove Scan barcode part from website
+Reordering csv file functionality
+Naming csv file with date/time so they aren't duplicates
+Change serial number to date time seconds
+-millisecond time maybe
