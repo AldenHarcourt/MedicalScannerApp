@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import { fetchDeviceData } from '../lib/api';
 import { exportToCsv } from '../lib/csv';
-import QrScanner from '../components/QrScanner';
 
 // Form Field Configuration
 const formFields = [
@@ -27,27 +26,13 @@ const submitField = [
 ]
 
 export default function Home() {
-  const [isScanning, setIsScanning] = useState(false);
   const [inventory, setInventory] = useState([]);
   const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [debug, setDebug] = useState(""); // Debug state
   const [udi, setUdi] = useState("");
-  const isProcessingScan = useRef(false);
 
   // Handlers
-  const handleBarCodeScanned = async (result) => {
-    setDebug("Scan result: " + JSON.stringify(result));
-    if (isProcessingScan.current || !result) {
-      return;
-    }
-    isProcessingScan.current = true;
-    
-    setIsScanning(false);
-    setIsLoading(true);
-
-    setUdi(result?.text || result);
-  };
 
   const fetchData = async () => {
     try {
@@ -108,14 +93,6 @@ export default function Home() {
     }
   };
   
-  const startScanning = () => {
-      isProcessingScan.current = false;
-      setIsScanning(true);
-  }
-  
-  const stopScanning = () => {
-      setIsScanning(false);
-  }
 
   // Main Render
   return (
@@ -126,26 +103,6 @@ export default function Home() {
             Medical Device Scanner
           </h1>
           
-          {/* Scanner Section */}
-          <div className="bg-surface rounded-xl p-6 mb-6">
-            <h2 className="text-xl font-semibold text-primary mb-4">1. Scan Barcode</h2>
-            <div className="w-full h-64 bg-black rounded-lg overflow-hidden mb-4">
-              <QrScanner 
-                onResult={handleBarCodeScanned}
-                isScanning={isScanning}
-              />
-            </div>
-            <button 
-              className={`w-full py-3 px-4 rounded-lg font-bold ${
-                isScanning 
-                  ? 'bg-accentRed text-white hover:opacity-90' 
-                  : 'bg-primary text-background hover:opacity-90'
-              } transition-opacity`}
-              onClick={isScanning ? stopScanning : startScanning}
-            >
-              {isScanning ? "Stop Scanning" : "Start Scanning"}
-            </button>
-          </div>
           
           {isLoading && (
             <div className="flex justify-center my-6">
@@ -167,7 +124,7 @@ export default function Home() {
   function submitForm() {
     return (
       <div className="bg-surface rounded-xl p-6 mb-6">
-        <h2 className="text-xl font-semibold text-primary mb-4">2. Verify UDI</h2>
+        <h2 className="text-xl font-semibold text-primary mb-4">1. Verify UDI</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {submitField.map(field => (
             <div key={field.id} className={true ? 'md:col-span-2' : ''}>
@@ -195,7 +152,7 @@ export default function Home() {
   function renderForm() {
     return (
       <div className="bg-surface rounded-xl p-6 mb-6">
-        <h2 className="text-xl font-semibold text-primary mb-4">3. Review & Add Item</h2>
+        <h2 className="text-xl font-semibold text-primary mb-4">2. Review & Add Item</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {formFields.map(field => (
             <div key={field.id} className={field.fullWidth ? 'md:col-span-2' : ''}>
@@ -228,7 +185,7 @@ export default function Home() {
   function renderTable() {
     return (
       <div className="bg-surface rounded-xl p-6">
-        <h2 className="text-xl font-semibold text-primary mb-4">4. Collected Items</h2>
+        <h2 className="text-xl font-semibold text-primary mb-4">3. Collected Items</h2>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
