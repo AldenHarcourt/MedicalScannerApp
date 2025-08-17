@@ -6,19 +6,19 @@ import { exportToCsv } from '../lib/csv';
 
 // Form Field Configuration
 const formFields = [
-    { label: 'UDI', id: 'udi', fullWidth: true },
-    { label: 'DI', id: 'deviceDI' },
-    { label: 'Company', id: 'companyName'},
-    { label: 'Exp. Date', id: 'expirationDate' },
-    { label: 'Lot #', id: 'lotNumber' },
+    { label: 'Serial #', id: 'serialNumber' },
+    { label: 'DI', id: 'deviceDI', fullWidth: true },
+    { label: 'Company', id: 'companyName' },
     { label: 'Brand', id: 'brandName' },
     { label: 'Ref #', id: 'refNumber' },
     { label: 'Model #', id: 'modelNumber' },
-    { label: 'Part Name', id: 'partName', fullWidth: true },
+    { label: 'Exp. Date', id: 'expirationDate' },
+    { label: 'Lot #', id: 'lotNumber' },
     { label: 'Unit', id: 'unit' },
     { label: 'Quantity', id: 'quantity' },
-    { label: 'Scan Timestamp', id: 'timestamp', fullWidth: true, readonly: true },
-    { label: 'Serial # / Item #', id: 'serialNumber', fullWidth: true },
+    { label: 'Part Name', id: 'partName' },
+    { label: 'UDI', id: 'udi' },
+    { label: 'Scan Timestamp', id: 'timestamp', readonly: true },
 ];
 
 // UDI Verifier Component
