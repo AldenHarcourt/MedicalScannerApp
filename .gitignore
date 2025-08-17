@@ -35,5 +35,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts 
 
-# from Dean's email
-information_order.png
+# some of Alden's screenshots 
+/screenshots

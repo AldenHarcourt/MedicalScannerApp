@@ -109,13 +109,19 @@ export default function Home() {
             </div>
           )}
 
-          {/* Top Section: UDI and Form side by side */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            {submitForm()}
-            {renderForm()}
+          {/* Optimized 3-section layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[calc(100vh-8rem)]">
+            {/* Left column: UDI (top) + Collected Items (bottom) */}
+            <div className="flex flex-col gap-4">
+              {submitForm()}
+              {renderTable()}
+            </div>
+            
+            {/* Right column: Review & Add Item (full height) */}
+            <div>
+              {renderForm()}
+            </div>
           </div>
-          
-          {renderTable()}
           {/* <div style={{ color: 'red', marginTop: 20, wordBreak: 'break-all' }}>
             {debug}
           </div> */}
@@ -185,9 +191,9 @@ export default function Home() {
 
   function renderTable() {
     return (
-      <div className="bg-surface rounded-xl p-4">
+      <div className="bg-surface rounded-xl p-4 flex-1 flex flex-col">
         <h2 className="text-lg font-semibold text-primary mb-3">3. Collected Items</h2>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-1">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
@@ -229,7 +235,7 @@ export default function Home() {
           </table>
         </div>
         <button 
-          className={`btn-export w-full mt-6 ${inventory.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`btn-export w-full mt-4 ${inventory.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={handleExport}
           disabled={inventory.length === 0}
         >
