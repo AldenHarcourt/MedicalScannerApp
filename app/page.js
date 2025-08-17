@@ -98,20 +98,23 @@ export default function Home() {
   return (
     <main>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-5 py-8">
-          <h1 className="text-3xl font-bold text-text text-center mb-8 tracking-wide">
+        <div className="container mx-auto px-4 py-4">
+          <h1 className="text-2xl font-bold text-text text-center mb-4 tracking-wide">
             Medical Device Scanner
           </h1>
           
-          
           {isLoading && (
-            <div className="flex justify-center my-6">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="flex justify-center my-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
             </div>
           )}
 
-          {submitForm()}
-          {renderForm()}
+          {/* Top Section: UDI and Form side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            {submitForm()}
+            {renderForm()}
+          </div>
+          
           {renderTable()}
           {/* <div style={{ color: 'red', marginTop: 20, wordBreak: 'break-all' }}>
             {debug}
@@ -123,12 +126,12 @@ export default function Home() {
 
   function submitForm() {
     return (
-      <div className="bg-surface rounded-xl p-6 mb-6">
-        <h2 className="text-xl font-semibold text-primary mb-4">1. Verify UDI</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="bg-surface rounded-xl p-4">
+        <h2 className="text-lg font-semibold text-primary mb-3">1. Verify UDI</h2>
+        <div className="mb-4">
           {submitField.map(field => (
-            <div key={field.id} className={true ? 'md:col-span-2' : ''}>
-              <label className="block text-textSecondary font-medium mb-2">{'Submit UDI'}</label>
+            <div key={field.id}>
+              <label className="block text-textSecondary font-medium mb-1">{'Submit UDI'}</label>
               <input
                 type={false ? 'text' : 'text'}
                 className={`input-field w-full ${false ? 'input-readonly' : ''}`}
@@ -140,23 +143,21 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <div className="flex gap-4">
-          <button className="btn-primary flex-1" onClick={fetchData}>
-            Submit UDI
-          </button>
-        </div>
+        <button className="btn-primary w-full" onClick={fetchData}>
+          Submit UDI
+        </button>
       </div>
     );
   }
 
   function renderForm() {
     return (
-      <div className="bg-surface rounded-xl p-6 mb-6">
-        <h2 className="text-xl font-semibold text-primary mb-4">2. Review & Add Item</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="bg-surface rounded-xl p-4">
+        <h2 className="text-lg font-semibold text-primary mb-3">2. Review & Add Item</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
           {formFields.map(field => (
             <div key={field.id} className={field.fullWidth ? 'md:col-span-2' : ''}>
-              <label className="block text-textSecondary font-medium mb-2">{field.label}</label>
+              <label className="block text-textSecondary font-medium mb-1">{field.label}</label>
               <input
                 type={field.readonly ? 'text' : 'text'}
                 className={`input-field w-full ${field.readonly ? 'input-readonly' : ''}`}
@@ -168,7 +169,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-2">
           <button className="btn-primary flex-1" onClick={addItemToList}>
             <span>➕</span>
             Add to List
@@ -184,8 +185,8 @@ export default function Home() {
 
   function renderTable() {
     return (
-      <div className="bg-surface rounded-xl p-6">
-        <h2 className="text-xl font-semibold text-primary mb-4">3. Collected Items</h2>
+      <div className="bg-surface rounded-xl p-4">
+        <h2 className="text-lg font-semibold text-primary mb-3">3. Collected Items</h2>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
