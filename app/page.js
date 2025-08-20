@@ -17,8 +17,8 @@ const formFields = [
     { label: 'Unit', id: 'unit' },
     { label: 'Quantity', id: 'quantity' },
     { label: 'Part Name', id: 'partName' },
-    { label: 'UDI', id: 'udi' },
     { label: 'Scan Timestamp', id: 'timestamp', readonly: true },
+    { label: 'UDI', id: 'udi' },
 ];
 
 // UDI Verifier Component
