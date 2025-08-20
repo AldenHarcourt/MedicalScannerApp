@@ -71,6 +71,12 @@ export default function Home() {
       alert('Cannot add an item without a UDI.');
       return;
     }
+    if (!formData.serialNumber) {
+      setFormData({
+        serialNumber: `ITEM-${Date.now()}`
+      });
+      return;
+    }
     setInventory(prev => [...prev, formData]);
     clearForm();
   };
