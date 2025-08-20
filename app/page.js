@@ -46,7 +46,7 @@ export default function Home() {
       setFormData({
         udi: udi?.text || udi,
         timestamp: new Date().toLocaleString(),
-        serialNumber: `ITEM-${Date.now()}`
+        serialNumber: `${Date.now()}`
       });
     } finally {
         setIsLoading(false);
@@ -73,9 +73,8 @@ export default function Home() {
     }
     if (!formData.serialNumber) {
       setFormData({
-        serialNumber: `ITEM-${Date.now()}`
+        serialNumber: `${Date.now()}`
       });
-      return;
     }
     setInventory(prev => [...prev, formData]);
     clearForm();
