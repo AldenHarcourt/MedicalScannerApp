@@ -70,7 +70,7 @@ export default function Home() {
     if (!formData.udi) {
       alert('Cannot add an item without a UDI.');
       return;
-    } else if (!formData.serialNumber) {
+    } else if (!formData.serialNumber || formData.serialNumber === "") {
       setFormData({
         serialNumber: `${Date.now()}`
       });
