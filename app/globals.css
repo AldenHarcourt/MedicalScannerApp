@@ -38,4 +38,8 @@
   .input-readonly {
     @apply bg-surface text-textSecondary;
   }
+
+  .bg-soft-yellow {
+    background-color: #63580d; /* A soft, warm yellow that complements neutral tones */
+  }
 } 
