@@ -210,7 +210,8 @@ export default function Home() {
               {inventory.length > 0 ? inventory.map((item, index) => (
                 <tr key={index} className="border-b border-border">
                   {formFields.map(f => (
-                    <td key={f.id} className="p-2 text-text text-sm">
+                    <td key={f.id} className={`p-2 text-text text-sm ${f.id === 'partName' ? 'part-name-cell' : ''}`} 
+                        title={f.id === 'partName' ? (item[f.id] || '') : undefined}>
                       {item[f.id] || ''}
                     </td>
                   ))}

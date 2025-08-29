@@ -38,4 +38,27 @@
   .input-readonly {
     @apply bg-surface text-textSecondary;
   }
+  
+  .part-name-cell {
+    @apply max-w-48 truncate cursor-help;
+    position: relative;
+  }
+  
+  .part-name-cell:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: normal;
+    word-wrap: break-word;
+    max-width: 300px;
+    z-index: 1000;
+    border: 1px solid #333;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
 } 
