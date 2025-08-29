@@ -6,7 +6,7 @@ import { exportToCsv } from '../lib/csv';
 
 // Form Field Configuration
 const formFields = [
-    { label: 'Serial #', id: 'serialNumber' },
+    { label: 'Serial #', id: 'serialNumber', readonly: true },
     { label: 'DI', id: 'deviceDI' },
     { label: 'Company', id: 'companyName' },
     { label: 'Brand', id: 'brandName' },
@@ -17,8 +17,8 @@ const formFields = [
     { label: 'Unit', id: 'unit' },
     { label: 'Quantity', id: 'quantity' },
     { label: 'Part Name', id: 'partName' },
-    { label: 'UDI', id: 'udi' },
     { label: 'Scan Timestamp', id: 'timestamp', readonly: true },
+    { label: 'UDI', id: 'udi', fullWidth: true },
 ];
 
 // UDI Verifier Component
@@ -46,7 +46,7 @@ export default function Home() {
       setFormData({
         udi: udi?.text || udi,
         timestamp: new Date().toLocaleString(),
-        serialNumber: `ITEM-${Date.now()}`
+        serialNumber: `${Date.now()}`
       });
     } finally {
         setIsLoading(false);
@@ -69,6 +69,11 @@ export default function Home() {
   const addItemToList = () => {
     if (!formData.udi) {
       alert('Cannot add an item without a UDI.');
+      return;
+    } 
+    if (!formData.serialNumber || formData.serialNumber === '') {
+      setInventory(prev => [...prev, {...formData, serialNumber: `${Date.now()}`}]);
+      clearForm();
       return;
     }
     setInventory(prev => [...prev, formData]);
@@ -163,11 +168,13 @@ export default function Home() {
         <h2 className="text-base font-semibold text-primary mb-2">2. Review & Add Item</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
           {formFields.map(field => (
-            <div key={field.id} className={field.fullWidth ? 'md:col-span-2' : ''}>
+            <div key={field.id} className={field.fullWidth ? 'col-span-full' : ''}>
               <label className="block text-textSecondary text-sm font-medium mb-1">{field.label}</label>
               <input
                 type={field.readonly ? 'text' : 'text'}
-                className={`input-field w-full ${field.readonly ? 'input-readonly' : ''}`}
+                className={`input-field w-full ${field.readonly ? 'input-readonly' : ''} ${
+                  field.id === 'refNumber' && !formData[field.id] ? 'bg-soft-yellow' : ''
+                }`}
                 value={formData[field.id]?.toString() || ''}
                 onChange={(e) => handleFormChange(field.id, e.target.value)}
                 placeholder={field.label}
