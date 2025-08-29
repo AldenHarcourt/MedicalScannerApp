@@ -47,6 +47,21 @@
     background-color: rgba(30, 30, 30, 0.5);
   }
 
+  .cell-popover {
+    position: absolute;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    max-width: 300px;
+    word-wrap: break-word;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+  }
+
   .bg-soft-yellow {
     background-color: #63580d; /* A soft, warm yellow that complements neutral tones */
   }

@@ -100,9 +100,17 @@ export default function Home() {
     }
   };
 
-  const handleCellClick = (content, fieldLabel) => {
-    if (content && content.length > 20) { // Only show modal for longer content
-      setExpandedCell({ content, fieldLabel });
+  const handleCellClick = (content, fieldLabel, event) => {
+    if (content && content.length > 20) { // Only show popover for longer content
+      const rect = event.target.getBoundingClientRect();
+      setExpandedCell({ 
+        content, 
+        fieldLabel, 
+        position: {
+          top: rect.top + window.scrollY - 10, // Position above the cell
+          left: rect.left + window.scrollX
+        }
+      });
     }
   };
 
@@ -143,24 +151,23 @@ export default function Home() {
           </div> */}
         </div>
         
-        {/* Cell Content Modal */}
+        {/* Cell Content Popover */}
         {expandedCell && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={closeExpandedCell}>
-            <div className="bg-surface rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-primary">{expandedCell.fieldLabel}</h3>
-                <button 
-                  onClick={closeExpandedCell}
-                  className="text-textSecondary hover:text-text text-xl"
-                >
-                  ×
-                </button>
-              </div>
-              <div className="text-text text-sm bg-background p-3 rounded border border-border max-h-60 overflow-y-auto">
-                {expandedCell.content}
-              </div>
+          <>
+            {/* Invisible overlay to close popover when clicking elsewhere */}
+            <div className="fixed inset-0 z-40" onClick={closeExpandedCell}></div>
+            {/* Positioned popover */}
+            <div 
+              className="cell-popover"
+              style={{
+                top: `${expandedCell.position.top}px`,
+                left: `${expandedCell.position.left}px`,
+              }}
+            >
+              <div className="text-primary font-semibold text-xs mb-1">{expandedCell.fieldLabel}</div>
+              <div className="text-text">{expandedCell.content}</div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </main>
@@ -248,7 +255,7 @@ export default function Home() {
                 <tr key={index} className="border-b border-border">
                   {formFields.map(f => (
                     <td key={f.id} className="p-2 text-text text-sm table-cell-truncated" 
-                        onClick={() => handleCellClick(item[f.id] || '', f.label)}>
+                        onClick={(e) => handleCellClick(item[f.id] || '', f.label, e)}>
                       {item[f.id] || ''}
                     </td>
                   ))}
