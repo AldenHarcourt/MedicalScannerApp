@@ -101,7 +101,7 @@ export default function Home() {
   };
 
   const handleCellClick = (content, fieldLabel, event) => {
-    if (content && content.length > 20) { // Only show popover for longer content
+    if (content && content.trim() !== '') { // Show popover for any non-empty content
       const rect = event.target.getBoundingClientRect();
       setExpandedCell({ 
         content, 
