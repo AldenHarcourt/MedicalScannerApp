@@ -32,6 +32,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [debug, setDebug] = useState(""); // Debug state
   const [udi, setUdi] = useState("");
+  const [expandedCell, setExpandedCell] = useState(null);
 
   // Handlers
 
@@ -98,7 +99,16 @@ export default function Home() {
       console.error(error);
     }
   };
-  
+
+  const handleCellClick = (content, fieldLabel) => {
+    if (content && content.length > 20) { // Only show modal for longer content
+      setExpandedCell({ content, fieldLabel });
+    }
+  };
+
+  const closeExpandedCell = () => {
+    setExpandedCell(null);
+  };
 
   // Main Render
   return (
@@ -132,6 +142,26 @@ export default function Home() {
             {debug}
           </div> */}
         </div>
+        
+        {/* Cell Content Modal */}
+        {expandedCell && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={closeExpandedCell}>
+            <div className="bg-surface rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-primary">{expandedCell.fieldLabel}</h3>
+                <button 
+                  onClick={closeExpandedCell}
+                  className="text-textSecondary hover:text-text text-xl"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="text-text text-sm bg-background p-3 rounded border border-border max-h-60 overflow-y-auto">
+                {expandedCell.content}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
@@ -217,8 +247,8 @@ export default function Home() {
               {inventory.length > 0 ? inventory.map((item, index) => (
                 <tr key={index} className="border-b border-border">
                   {formFields.map(f => (
-                    <td key={f.id} className={`p-2 text-text text-sm ${f.id === 'partName' ? 'part-name-cell' : ''}`} 
-                        title={f.id === 'partName' ? (item[f.id] || '') : undefined}>
+                    <td key={f.id} className="p-2 text-text text-sm table-cell-truncated" 
+                        onClick={() => handleCellClick(item[f.id] || '', f.label)}>
                       {item[f.id] || ''}
                     </td>
                   ))}
