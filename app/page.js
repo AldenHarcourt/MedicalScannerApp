@@ -251,7 +251,7 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {inventory.length > 0 ? inventory.map((item, index) => (
+              {inventory.length > 0 ? inventory.slice().reverse().map((item, index) => (
                 <tr key={index} className="border-b border-border">
                   {formFields.map(f => (
                     <td key={f.id} className="p-2 text-text text-sm table-cell-truncated" 
@@ -261,7 +261,7 @@ export default function Home() {
                   ))}
                   <td className="p-2 text-center">
                     <button 
-                      onClick={() => removeItem(index)}
+                      onClick={() => removeItem(inventory.length - 1 - index)}
                       className="text-accentRed hover:opacity-80 transition-opacity"
                     >
                       Delete
