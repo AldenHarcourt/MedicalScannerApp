@@ -19,7 +19,10 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#121212"
       },
-      "package": "com.aldenharcourt.MedicalScanner"
+      "package": "com.aldenharcourt.MedicalScanner",
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/icon.png"

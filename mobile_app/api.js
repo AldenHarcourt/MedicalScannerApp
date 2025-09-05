@@ -49,17 +49,27 @@ export const fetchDeviceData = async (di) => {
           companyName: device.companyName || '',
           brandName: device.brandName || '',
           refNumber: device.catalogNumber || '',
+          modelNumber: device.versionModelNumber || '',
           partName: device.deviceDescription || '',
           unit: device.deviceCount?.toString() || '1',
       };
   }
+
+  // Pulls expirationDate and lotNumber from UDI header
+  if (json?.udi?.expirationDate) {
+    parsedData.expirationDate = json.udi.expirationDate;
+  }
+  if (json?.udi?.lotNumber) {
+    parsedData.lotNumber = json.udi.lotNumber;
+  }
+  if (json?.udi?.di) {
+    parsedData.deviceId = json.udi.di;
+  }
   
   // Always add these non-API fields at the end.
   parsedData.timestamp = new Date().toLocaleString();
-  if (!parsedData.serialNumber) {
-      // Provide a unique, editable default if no serial is found
-      parsedData.serialNumber = `ITEM-${Date.now()}`;
-  }
+  // Generate sequential unique serial number (shortened for readability)
+  parsedData.serialNumber = Date.now().toString();
   if(!parsedData.quantity) {
       parsedData.quantity = '1';
   }

@@ -32,7 +32,8 @@ const convertToCsvString = (data, columns) => {
  */
 export const exportToCsv = async (data, columns) => {
   const csvString = convertToCsvString(data, columns);
-  const timestamp = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const filename = `device-inventory-${timestamp}.csv`;
   const fileUri = FileSystem.cacheDirectory + filename;
 

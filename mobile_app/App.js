@@ -14,18 +14,19 @@ import { exportToCsv } from './csv';
 
 // --- Form Field Configuration ---
 const formFields = [
-    { label: 'UDI', id: 'udi', fullWidth: true },
+    { label: 'Serial #', id: 'serialNumber', readonly: true },
     { label: 'DI', id: 'deviceId' },
     { label: 'Company', id: 'companyName' },
-    { label: 'Exp. Date', id: 'expirationDate' },
-    { label: 'Lot #', id: 'lotNumber' },
     { label: 'Brand', id: 'brandName' },
     { label: 'Ref #', id: 'refNumber' },
-    { label: 'Part Name', id: 'partName', fullWidth: true },
+    { label: 'Model #', id: 'modelNumber' },
+    { label: 'Exp. Date', id: 'expirationDate' },
+    { label: 'Lot #', id: 'lotNumber' },
     { label: 'Unit', id: 'unit' },
     { label: 'Quantity', id: 'quantity' },
-    { label: 'Scan Timestamp', id: 'timestamp', fullWidth: true, readonly: true },
-    { label: 'Serial # / Item #', id: 'serialNumber', fullWidth: true },
+    { label: 'Part Name', id: 'partName' },
+    { label: 'Scan Timestamp', id: 'timestamp', readonly: true },
+    { label: 'UDI', id: 'udi', fullWidth: true },
 ];
 
 // Field configuration for manual UDI submission
@@ -39,6 +40,7 @@ export default function App() {
   const [inventory, setInventory] = useState([]);
   const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedCell, setExpandedCell] = useState(null);
   const isProcessingScan = useRef(false);
 
   // --- Effects ---
@@ -53,20 +55,20 @@ export default function App() {
     if (!udi) return;
     
     setIsLoading(true);
-    setDebugInfo(prev => `Fetching data for UDI: ${udi}\n${prev}`);
+    // setDebugInfo(prev => `Fetching data for UDI: ${udi}\n${prev}`);
     
     try {
       const apiData = await fetchDeviceData(udi);
       setFormData(apiData);
-      setDebugInfo(prev => `Successfully fetched data for UDI: ${udi}\n${prev}`);
+      // setDebugInfo(prev => `Successfully fetched data for UDI: ${udi}\n${prev}`);
     } catch (error) {
       const errorMsg = `Error fetching device data: ${error.message}`;
-      setDebugInfo(prev => `${errorMsg}\n${prev}`);
+      // setDebugInfo(prev => `${errorMsg}\n${prev}`);
       Alert.alert('API Error', error.message || 'Could not fetch device data.');
       setFormData({
         udi: udi,
         timestamp: new Date().toLocaleString(),
-        serialNumber: `ITEM-${Date.now()}`
+        serialNumber: Date.now().toString()
       });
     } finally {
       setIsLoading(false);
@@ -83,27 +85,32 @@ export default function App() {
     setManualUdi('');
   };
 
-  const handleBarCodeScanned = async ({ data }) => {
-    if (isProcessingScan.current) {
+  const handleBarCodeScanned = async ({ data, type }) => {
+    if (isProcessingScan.current || !data) {
       return;
     }
     isProcessingScan.current = true;
     
+    // setDebugInfo(prev => `Scanned ${type}: ${data}\n${prev}`);
     setIsScanning(false);
     setIsLoading(true);
 
     try {
       const apiData = await fetchDeviceData(data);
       setFormData(apiData);
+      // setDebugInfo(prev => `Successfully processed scan: ${data}\n${prev}`);
     } catch (error) {
+      const errorMsg = `Scan Error: ${error.message}`;
+      // setDebugInfo(prev => `${errorMsg}\n${prev}`);
       Alert.alert('API Error', error.message || 'Could not fetch device data.');
       setFormData({
         udi: data,
         timestamp: new Date().toLocaleString(),
-        serialNumber: `ITEM-${Date.now()}`
+        serialNumber: Date.now().toString()
       });
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
+      isProcessingScan.current = false;
     }
   };
 
@@ -157,6 +164,19 @@ export default function App() {
       setIsScanning(false);
   }
 
+  const handleCellClick = (content, fieldLabel) => {
+    if (content && content.trim() !== '') {
+      setExpandedCell({ 
+        content, 
+        fieldLabel
+      });
+    }
+  };
+
+  const closeExpandedCell = () => {
+    setExpandedCell(null);
+  };
+
   // --- Render Functions ---
   const renderApp = () => (
     <SafeAreaView style={styles.screen}>
@@ -170,11 +190,13 @@ export default function App() {
           <View style={styles.cameraContainer}>
             {isScanning ? (
               <CameraView
+                facing="back"
                 onBarcodeScanned={isScanning ? handleBarCodeScanned : undefined}
                 barcodeScannerSettings={{
-                  barcodeTypes: ["qr", "code128", "datamatrix", "pdf417", "ean13"],
+                  barcodeTypes: ["qr", "code128", "datamatrix", "pdf417", "ean13", "code39", "codabar"],
                 }}
                 style={StyleSheet.absoluteFillObject}
+                autofocus="on"
               />
             ) : (
                 <View style={styles.cameraPlaceholder}>
@@ -195,9 +217,26 @@ export default function App() {
         {renderManualUdiInput()}
         {renderForm()}
         {renderTable()}
-        {renderDebugInfo()}
+        {/* {renderDebugInfo()} */}
 
       </ScrollView>
+      
+      {/* Cell Content Popover */}
+      {expandedCell && (
+        <>
+          {/* Invisible overlay to close popover when tapping elsewhere */}
+          <TouchableOpacity 
+            style={styles.popoverOverlay} 
+            activeOpacity={1} 
+            onPress={closeExpandedCell}
+          />
+          {/* Positioned popover */}
+          <View style={styles.popoverContent}>
+            <Text style={styles.popoverTitle}>{expandedCell.fieldLabel}</Text>
+            <Text style={styles.popoverText}>{expandedCell.content}</Text>
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 
@@ -233,7 +272,11 @@ export default function App() {
         <View key={field.id} style={[styles.inputContainer, field.fullWidth && { width: '100%'}]}>
           <Text style={styles.label}>{field.label}</Text>
           <TextInput
-            style={[styles.input, field.readonly && styles.inputReadonly]}
+            style={[
+              styles.input, 
+              field.readonly && styles.inputReadonly,
+              field.id === 'refNumber' && !formData[field.id] && styles.inputHighlight
+            ]}
             value={formData[field.id]?.toString() || ''}
             onChangeText={text => handleFormChange(field.id, text)}
             placeholderTextColor="#555"
@@ -284,10 +327,14 @@ export default function App() {
              <Text style={[styles.tableHeader, {width: 80, textAlign: 'center'}]}>Actions</Text>
           </View>
           {/* Data Rows */}
-          {inventory.length > 0 ? inventory.map((item, index) => (
+          {inventory.length > 0 ? inventory.slice().reverse().map((item, index) => (
             <View key={index} style={[styles.tableRow, styles.dataRow]}>
-              {formFields.map(f => <Text key={f.id} style={[styles.tableCell, {width: 120}]}>{item[f.id]}</Text>)}
-               <TouchableOpacity onPress={() => removeItem(index)} style={[styles.tableCell, {width: 80, alignItems: 'center'}]}>
+              {formFields.map(f => (
+                <TouchableOpacity key={f.id} onPress={() => handleCellClick(item[f.id] || '', f.label)} style={[styles.tableCell, {width: 120}]}>
+                  <Text style={{color: colors.text, fontSize: 12}} numberOfLines={1} ellipsizeMode="tail">{item[f.id] || ''}</Text>
+                </TouchableOpacity>
+              ))}
+               <TouchableOpacity onPress={() => removeItem(inventory.length - 1 - index)} style={[styles.tableCell, {width: 80, alignItems: 'center'}]}>
                   <FontAwesome name="trash" size={20} color={colors.accentRed} />
                </TouchableOpacity>
             </View>
@@ -360,6 +407,7 @@ const styles = StyleSheet.create({
   label: { marginBottom: 8, color: colors.textSecondary, fontWeight: '500' },
   input: { borderWidth: 1, borderColor: colors.border, padding: 12, borderRadius: 8, backgroundColor: colors.background, color: colors.text, fontSize: 16 },
   inputReadonly: { backgroundColor: '#2a2a2a' },
+  inputHighlight: { backgroundColor: '#ffeb3b20', borderColor: '#ffeb3b' },
   buttonGroup: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
   button: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 8, flex: 1, marginHorizontal: 5 },
   primaryButton: { backgroundColor: colors.primary },
@@ -381,4 +429,24 @@ const styles = StyleSheet.create({
   debugTitle: { color: colors.accentGreen, fontWeight: 'bold', marginBottom: 10 },
   debugScrollView: { maxHeight: 150, marginBottom: 10 },
   debugText: { color: '#aaa', fontSize: 12, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
+
+  // Popover
+  popoverOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'transparent' },
+  popoverContent: { 
+    position: 'absolute', 
+    top: 100, 
+    left: 20, 
+    right: 20, 
+    backgroundColor: colors.surface, 
+    borderRadius: 8, 
+    padding: 15, 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 1000
+  },
+  popoverTitle: { color: colors.primary, fontWeight: 'bold', fontSize: 12, marginBottom: 5 },
+  popoverText: { color: colors.text, fontSize: 14, lineHeight: 18 },
 });

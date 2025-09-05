@@ -37,3 +37,6 @@ next-env.d.ts
 
 # some of Alden's screenshots 
 /screenshots
+
+CLAUDE
+*.claude
